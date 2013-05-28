@@ -99,6 +99,11 @@ void               pango_cairo_context_set_resolution     (PangoContext       *c
 							   double              dpi);
 double             pango_cairo_context_get_resolution     (PangoContext       *context);
 
+void               pango_cairo_context_set_alpha     (PangoContext       *context,
+							   guint16              alpha);
+guint16            pango_cairo_context_get_alpha     (PangoContext       *context);
+
+
 void                        pango_cairo_context_set_shape_renderer (PangoContext                *context,
 								    PangoCairoShapeRendererFunc  func,
 								    gpointer                     data,

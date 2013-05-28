@@ -44,6 +44,8 @@ struct _PangoCairoRenderer
   /* house-keeping options */
   gboolean is_cached_renderer;
   gboolean cr_had_current_point;
+
+  guint16 alpha;
 };
 
 struct _PangoCairoRendererClass
@@ -60,10 +62,11 @@ set_color (PangoCairoRenderer *crenderer,
   PangoColor *color = pango_renderer_get_color ((PangoRenderer *) (crenderer), part);
 
   if (color)
-    cairo_set_source_rgb (crenderer->cr,
-			  color->red / 65535.,
-			  color->green / 65535.,
-			  color->blue / 65535.);
+      cairo_set_source_rgba (crenderer->cr,
+                             color->red / 65535.,
+                             color->green / 65535.,
+                             color->blue / 65535.,
+                             crenderer->alpha/ 65535.);
 }
 
 /* note: modifies crenderer->cr without doing cairo_save/restore() */
@@ -734,6 +737,7 @@ release_renderer (PangoCairoRenderer *renderer)
       renderer->has_show_text_glyphs = FALSE;
       renderer->x_offset = 0.;
       renderer->y_offset = 0.;
+      renderer->alpha = 65535;
 
       G_UNLOCK (cached_renderer);
     }
@@ -872,6 +876,11 @@ _pango_cairo_do_layout (cairo_t     *cr,
 
   crenderer->cr = cr;
   crenderer->do_path = do_path;
+
+  PangoContext* context = pango_layout_get_context(layout);
+  guint16 alpha = pango_cairo_context_get_alpha(context);
+  crenderer->alpha = alpha;
+
   save_current_point (crenderer);
 
   pango_renderer_draw_layout (renderer, layout, 0, 0);

@@ -32,6 +32,7 @@ typedef struct _PangoCairoContextInfo PangoCairoContextInfo;
 struct _PangoCairoContextInfo
 {
   double dpi;
+  guint16 alpha;
 
   cairo_font_options_t *set_options;
   cairo_font_options_t *surface_options;
@@ -75,6 +76,7 @@ retry:
     {
       info = g_slice_new0 (PangoCairoContextInfo);
       info->dpi = -1.0;
+      info->alpha = 65535.;
 
       if (!g_object_replace_qdata (G_OBJECT (context), context_info_quark, NULL,
                                    info, (GDestroyNotify)free_context_info,
@@ -213,6 +215,42 @@ pango_cairo_context_get_resolution (PangoContext *context)
     return info->dpi;
   else
     return -1.0;
+}
+
+/**
+ * pango_cairo_context_set_alpha:
+ * @context: a #PangoContext, from a pangocairo layout or fontmap
+ * @alpha: the alpha coefficient from 0 (transparent) to 65535 for opaque
+ *
+ * Since: 1.34
+ **/
+void
+pango_cairo_context_set_alpha (PangoContext *context,
+				    guint16        alpha)
+{
+  PangoCairoContextInfo *info = get_context_info (context, TRUE);
+  info->alpha = alpha;
+}
+
+/**
+ * pango_cairo_context_get_alpha:
+ * @context: a #PangoContext, from a pangocairo layout or font map
+ *
+ * Gets the alpha for the context. See pango_cairo_context_set_alpha()
+ *
+ * Return value: the alpha from 0 (transparent) to 1 (opaque).
+ *
+ * Since: 1.34
+ **/
+guint16
+pango_cairo_context_get_alpha (PangoContext *context)
+{
+  PangoCairoContextInfo *info = get_context_info (context, FALSE);
+
+  if (info)
+    return info->alpha;
+  else
+    return 65535;
 }
 
 /**
